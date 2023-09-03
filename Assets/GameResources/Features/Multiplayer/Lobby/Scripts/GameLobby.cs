@@ -22,6 +22,12 @@ public class GameLobby : MonoBehaviour
 
     public event Action<OnLobbyListChangedEventArgs> onLobbyListChanged = delegate { };
 
+    public event Action onCreateLobbyStarted = delegate { };
+    public event Action onCreateLobbyFailed = delegate { };
+    public event Action onJoinStarted = delegate { };
+    public event Action onJoinFailed = delegate { };
+    public event Action onQuickJoinFailed = delegate { };
+
     public class OnLobbyListChangedEventArgs : EventArgs
     {
         public List<Lobby> lobbyList;
@@ -170,6 +176,7 @@ public class GameLobby : MonoBehaviour
 
     public async void CreateLobby(string lobbyName, bool isPrivate)
     {
+        onCreateLobbyStarted();
         try
         {
             joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayerAmount, new CreateLobbyOptions
@@ -200,11 +207,13 @@ public class GameLobby : MonoBehaviour
         catch (LobbyServiceException ex)
         {
             Debug.Log(ex);
+            onCreateLobbyFailed();
         }
     }
 
     public async void QuickJoin()
     {
+        onJoinStarted();
         try
         {
             joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
@@ -219,12 +228,14 @@ public class GameLobby : MonoBehaviour
         catch (LobbyServiceException ex)
         {
             Debug.Log(ex);
+            onQuickJoinFailed();
 
         }
     }
 
     public async void JoinWithCode(string lobbyCode)
     {
+        onJoinStarted();
         try
         {
             joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
@@ -236,6 +247,7 @@ public class GameLobby : MonoBehaviour
         }
         catch (LobbyServiceException ex)
         {
+            onJoinFailed();
             Debug.Log(ex);
 
         }
